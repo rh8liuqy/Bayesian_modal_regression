@@ -1,0 +1,20 @@
+## normal
+# A tibble: 2 × 10
+  variable  mean median    sd   mad    q5    q95  rhat ess_bulk ess_tail
+  <chr>    <dbl>  <dbl> <dbl> <dbl> <dbl>  <dbl> <dbl>    <dbl>    <dbl>
+1 alpha    41.9   41.9  3.12  3.14  36.8  47.1    1.00   15822.   19673.
+2 beta[1]  -1.27  -1.26 0.841 0.849 -2.64  0.116  1.00   15614.   18993.
+
+## ALD
+# A tibble: 2 × 10
+  variable  mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
+  <chr>    <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
+1 alpha    32.8   32.7  2.05  2.03  29.5  36.2   1.00   13984.   16088.
+2 beta[1]  -1.87  -1.85 0.530 0.524 -2.77 -1.03  1.00   14043.   15873.
+
+## TPSC
+# A tibble: 2 × 10
+  variable  mean median    sd   mad    q5    q95  rhat ess_bulk ess_tail
+  <chr>    <dbl>  <dbl> <dbl> <dbl> <dbl>  <dbl> <dbl>    <dbl>    <dbl>
+1 alpha     9.67  9.76  1.44  1.18   7.46 11.7    1.00    4268.    1787.
+2 beta[1]  -1.01 -0.997 0.309 0.302 -1.53 -0.538  1.00    4581.    1832.
