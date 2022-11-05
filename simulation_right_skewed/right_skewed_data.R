@@ -91,7 +91,7 @@ p1 <- df1 %>%
                             "height: ",round(mean(normal_df_pred$upper -
                                                     normal_df_pred$lower),2),
                             "||",
-                            "elpd_loo: ",
+                            "ELPD: ",
                             round(normal_elpd_loo,2)))
 p1
 
@@ -148,7 +148,7 @@ p2 <- df1 %>%
                             "height: ",round(mean(median_df_pred$upper -
                                                     median_df_pred$lower),2),
                             "||",
-                            "elpd_loo: ",
+                            "ELPD: ",
                             round(median_elpd_loo,2)))
 p2
 grid.arrange(p1,p2,nrow=1)
@@ -206,7 +206,7 @@ p3 <- df1 %>%
                             "height: ",round(mean(TPSC_df_pred$upper -
                                                     TPSC_df_pred$lower),2),
                             "||",
-                            "elpd_loo: ",
+                            "ELPD: ",
                             round(TPSC_elpd_loo,2)))
 p3
 

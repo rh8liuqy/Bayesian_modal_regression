@@ -92,8 +92,7 @@ data_application_NO2 <- function(option){
     ggplot() +
     geom_ribbon(data = df_pred, 
                 aes(x = df1$wind_speed, ymin = lower, ymax=upper),
-                fill = "grey",
-                alpha = 0.4) +
+                fill = "grey70") +
     geom_line(data = df_pred, 
               aes(x = df1$wind_speed, y = pred),
               color = rgb(0.8,0,0,0.8)) +
@@ -113,7 +112,7 @@ data_application_NO2 <- function(option){
                               "height: ",round(mean(df_pred$upper -
                                                       df_pred$lower),4),
                               "||",
-                              "elpd_loo: ",
+                              "ELPD: ",
                               round(elpd_loo,4)))
   return(return(list(par.est = par.est,
                      elpd_loo = elpd_loo,
