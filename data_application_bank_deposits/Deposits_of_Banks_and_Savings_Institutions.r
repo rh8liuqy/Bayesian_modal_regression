@@ -79,6 +79,17 @@ stan_fit <- stan_mod$sample(
 ## parameter estimation 
 par.est <- stan_fit$summary()
 print(par.est)
+
+## traceplot
+df_post <- stan_fit$draws(variables = c("theta","sigma1","sigma2",
+                                        "delta1","delta2"), 
+                          format = "df")
+pdf("traceplot.pdf",height = 4,width = 8)
+mcmc_trace(df_post)
+dev.off()
+
+## density estimation plot
+
 xaxis <- seq(0,max(df1$`Deposits($ billions)`),length.out=1000)
 
 df_mix <- data.frame(x=xaxis,
@@ -107,7 +118,7 @@ p_out <- df_mix %>%
   theme_bw()+
   ylab("density") +
   xlab("Bank deposits ($billions)") +
-  ggtitle("Bank deposits data fitted with the DTP-student-t") +
+  ggtitle("Bank deposits data fitted with the DTP-Student-t") +
   geom_vline(data = df_M,
              aes(xintercept = x,
                  color = `measures of central tendency`,

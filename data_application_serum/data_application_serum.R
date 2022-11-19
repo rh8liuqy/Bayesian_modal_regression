@@ -79,6 +79,10 @@ data_application_serum <- function(option) {
   
   ## parameter estimation 
   par.est <- stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+  print(par.est)
+  df_post <- stan_fit$draws(variables = c("alpha",paste0("beta[",1:P,"]")), 
+                            format = "df")
+  plot(mcmc_trace(df_post))
   
   ## prediction interval
   stan_pred <- stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -121,12 +125,22 @@ data_application_serum <- function(option) {
               figure = p1))
 }
 
+pdf("traceplot_normal.pdf",height = 4,width = 8)
 out1 <- data_application_serum("normal")
+dev.off()
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
 out2 <- data_application_serum("ALD")
+dev.off()
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
 out3 <- data_application_serum("FG")
+dev.off()
 #out4 <- data_application_serum("logNM")
 #out5 <- data_application_serum("TPSC")
 #out6 <- data_application_serum("DTP")
+
+out1
+out2
+out3
 
 pall <- grid.arrange(out1$figure,
                      out2$figure,

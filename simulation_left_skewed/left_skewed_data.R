@@ -51,9 +51,14 @@ normal_stan_fit <- normal_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- normal_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_normal.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(normal_stan_fit$draws(c("alpha",
                                               paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 normal_stan_pred <- normal_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -86,7 +91,7 @@ p1 <- df1 %>%
                             round(mean((y < normal_df_pred$upper) & 
                                          (y > normal_df_pred$lower)),2),
                             "||",
-                            "height: ",round(mean(normal_df_pred$upper -
+                            "Width: ",round(mean(normal_df_pred$upper -
                                                     normal_df_pred$lower),2),
                             "||",
                             "ELPD: ",
@@ -109,9 +114,14 @@ median_stan_fit <- median_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- median_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(median_stan_fit$draws(c("alpha",
                                               paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 median_stan_pred <- median_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -144,7 +154,7 @@ p2 <- df1 %>%
                             round(mean((y < median_df_pred$upper) & 
                                          (y > median_df_pred$lower)),2),
                             "||",
-                            "height: ",round(mean(median_df_pred$upper -
+                            "Width: ",round(mean(median_df_pred$upper -
                                                     median_df_pred$lower),2),
                             "||",
                             "ELPD: ",
@@ -168,9 +178,14 @@ TPSC_stan_fit <- TPSC_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- TPSC_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(TPSC_stan_fit$draws(c("alpha",
                                             paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 TPSC_stan_pred <- TPSC_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -198,12 +213,12 @@ p3 <- df1 %>%
   ylim(-60,40) +
   xlab("X") +
   ylab("y") +
-  ggtitle("Likelihood: TPSC student t (modal regression model)",
+  ggtitle("Likelihood: TPSC-Student-t (modal regression model)",
           subtitle = paste0("Coverage Rate:",
                             round(mean((y < TPSC_df_pred$upper) & 
                                          (y > TPSC_df_pred$lower)),2),
                             "||",
-                            "height: ",round(mean(TPSC_df_pred$upper -
+                            "Width: ",round(mean(TPSC_df_pred$upper -
                                                     TPSC_df_pred$lower),2),
                             "||",
                             "ELPD: ",

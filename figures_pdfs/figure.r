@@ -137,7 +137,7 @@ p3 <- df %>%
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
-  ggtitle(TeX("Density plots of DTP-student-$t$ given $\\theta = 0, \\sigma_2 = 1, \\delta_1 = 10, \\delta_2 = 15$"))
+  ggtitle(TeX("Density plots of DTP-Student-$t$ given $\\theta = 0, \\sigma_2 = 1, \\delta_1 = 10, \\delta_2 = 15$"))
 p3
 
 ggsave("DTP.pdf",p3,height = 2.75,width = 9)
@@ -184,7 +184,7 @@ p4 <- df %>%
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
-  ggtitle(TeX("Density plots of TPSC-student-$t$ given $\\theta = 0, w = 0.3, \\delta = 1$"))
+  ggtitle(TeX("Density plots of TPSC-Student-$t$ given $\\theta = 0, w = 0.3, \\delta = 1$"))
 p4
 
 ggsave("TPSC1.pdf",p4,height = 2.75,width = 9)
@@ -223,8 +223,91 @@ p5 <- df %>%
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
-  ggtitle(TeX("Density plots of TPSC-student-$t$ given $\\theta = 0, w = 0.7, \\sigma = 1$"))
+  ggtitle(TeX("Density plots of TPSC-Student-$t$ given $\\theta = 0, w = 0.7, \\sigma = 1$"))
 p5
 
 ggsave("TPSC2.pdf",p5,height = 2.75,width = 9)
 
+## logNM
+
+dlogNM <- function(x,w,theta,mu1,nu1,mu2,nu2){
+  p1 <- w*dlnorm(exp(mu1-nu1^2)-(x-theta),mu1,nu1)
+  p2 <- (1-w)*dlnorm(exp(mu2-nu2^2)+(x-theta),mu2,nu2)
+  return(p1+p2)
+}
+
+xaxis <- seq(-15,15,length.out = 1000)
+yaxis <- dlogNM(xaxis,0.5,0,0,0.5,0,0.5)
+df1 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "mu_1 = 0")
+
+yaxis <- dlogNM(xaxis,0.5,0,0,0.5,0.5,0.5)
+df2 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "mu_1 = 0.5")
+
+yaxis <- dlogNM(xaxis,0.5,0,0,0.5,1,0.5)
+df3 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "mu_1 = 1")
+
+df <- bind_rows(df1,df2,df3)
+p6 <- df %>% 
+  ggplot(aes(x = y, y = density, color = type)) +
+  geom_line(aes(linetype = type),size = 0.6) +
+  scale_color_manual(labels = c(TeX("$\\mu_2 = 0$"), 
+                                TeX("$\\mu_2 = 0.5$"),
+                                TeX("$\\mu_2 = 1$")),
+                     values = c(rgb(0.8,0,0,0.8),
+                                rgb(0,0.8,0,0.8),
+                                rgb(0,0,0.8,0.8))) +
+  scale_linetype_manual(labels =c(TeX("$\\mu_2 = 0$"), 
+                                  TeX("$\\mu_2 = 0.5$"),
+                                  TeX("$\\mu_2 = 1$")),
+                        values = c(1,2,3)) +
+  scale_x_continuous(breaks = seq(-15,15,5)) +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank()) +
+  ggtitle(TeX("Density plots of logNM given $\\theta = 0, w = 0.5, \\nu_1 = \\nu_2 = 0.5,\\mu_1 = 0, $"))
+p6
+ggsave("logNM1.pdf",p6,height = 2.75,width = 9)
+
+xaxis <- seq(-15,15,length.out = 1000)
+yaxis <- dlogNM(xaxis,0.7,0,0.5,0.3,0,0.5)
+df1 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "nu_1 = 0.3")
+
+yaxis <- dlogNM(xaxis,0.7,0,0.5,0.6,0,0.5)
+df2 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "nu_1 = 0.6")
+
+yaxis <- dlogNM(xaxis,0.7,0,0.5,0.9,0,0.5)
+df3 <- data.frame(y = xaxis,
+                  density = yaxis,
+                  type = "nu_1 = 0.9")
+
+df <- bind_rows(df1,df2,df3)
+p7 <- df %>% 
+  ggplot(aes(x = y, y = density, color = type)) +
+  geom_line(aes(linetype = type),size = 0.6) +
+  scale_color_manual(labels = c(TeX("$\\nu_1 = 0.3$"), 
+                                TeX("$\\nu_1 = 0.6$"),
+                                TeX("$\\nu_1 = 0.9$")),
+                     values = c(rgb(0.8,0,0,0.8),
+                                rgb(0,0.8,0,0.8),
+                                rgb(0,0,0.8,0.8))) +
+  scale_linetype_manual(labels =c(TeX("$\\nu_1 = 0.3$"), 
+                                  TeX("$\\nu_1 = 0.6$"),
+                                  TeX("$\\nu_1 = 0.9$")),
+                        values = c(1,2,3)) +
+  scale_x_continuous(breaks = seq(-15,15,5)) +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank()) +
+  ggtitle(TeX("Density plots of logNM given $\\theta = 0, w = 0.7, \\mu_1 = 0.5, \\mu_2 = 0, \\nu_2 = 0.5 $"))
+p7
+ggsave("logNM2.pdf",p7,height = 2.75,width = 9)

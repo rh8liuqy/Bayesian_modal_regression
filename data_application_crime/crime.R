@@ -82,6 +82,10 @@ data_application_crime <- function(option) {
   
   ## parameter estimation 
   par.est <- stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+  print(par.est)
+  df_post <- stan_fit$draws(variables = c("alpha",paste0("beta[",1:P,"]")), 
+                            format = "df")
+  plot(mcmc_trace(df_post))
   
   ## prediction interval
   stan_pred <- stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -99,10 +103,15 @@ data_application_crime <- function(option) {
   return(list(par.est = par.est,
               elpd_loo = elpd_loo))
 }
-
+pdf("traceplot_normal.pdf",height = 4,width = 8)
 out1 <- data_application_crime("normal")
+dev.off()
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
 out2 <- data_application_crime("ALD")
+dev.off()
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
 out3 <- data_application_crime("TPSC")
+dev.off()
 
 out1
 out2

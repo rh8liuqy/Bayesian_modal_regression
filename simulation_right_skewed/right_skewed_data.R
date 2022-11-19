@@ -54,9 +54,14 @@ normal_stan_fit <- normal_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- normal_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_normal.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(normal_stan_fit$draws(c("alpha",
                                               paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 normal_stan_pred <- normal_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -85,14 +90,15 @@ p1 <- df1 %>%
   ylab("y") +
   ggtitle("Likelihood: Normal (mean regression model)",
           subtitle = paste0("Coverage Rate:",
-                            round(mean((y < normal_df_pred$upper) & 
-                                         (y > normal_df_pred$lower)),2),
+                            sprintf("%.2f",round(mean((y < normal_df_pred$upper) & 
+                                         (y > normal_df_pred$lower)),2)),
                             "||",
-                            "height: ",round(mean(normal_df_pred$upper -
-                                                    normal_df_pred$lower),2),
+                            "Width: ",
+                            sprintf("%.2f",round(mean(normal_df_pred$upper -
+                                                    normal_df_pred$lower),2)),
                             "||",
                             "ELPD: ",
-                            round(normal_elpd_loo,2)))
+                            sprintf("%.2f",round(normal_elpd_loo,2))))
 p1
 
 ## compile stan program for median regression
@@ -111,9 +117,14 @@ median_stan_fit <- median_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- median_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(median_stan_fit$draws(c("alpha",
                                               paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 median_stan_pred <- median_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -142,14 +153,15 @@ p2 <- df1 %>%
   ylab("y") +
   ggtitle("Likelihood: ALD (median regression model)",
           subtitle = paste0("Coverage Rate:",
-                            round(mean((y < median_df_pred$upper) & 
-                                         (y > median_df_pred$lower)),2),
+                            sprintf("%.2f",round(mean((y < median_df_pred$upper) & 
+                                         (y > median_df_pred$lower)),2)),
                             "||",
-                            "height: ",round(mean(median_df_pred$upper -
-                                                    median_df_pred$lower),2),
+                            "Width: ",
+                            sprintf("%.2f",round(mean(median_df_pred$upper -
+                                                    median_df_pred$lower),2)),
                             "||",
                             "ELPD: ",
-                            round(median_elpd_loo,2)))
+                            sprintf("%.2f",round(median_elpd_loo,2))))
 p2
 grid.arrange(p1,p2,nrow=1)
 
@@ -169,9 +181,14 @@ TPSC_stan_fit <- TPSC_stan_mod$sample(
   iter_sampling = 10000,
 )
 
+par.est <- TPSC_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
 ## traceplot
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
 bayesplot::mcmc_trace(TPSC_stan_fit$draws(c("alpha",
                                             paste0("beta[",1:P,"]"))))
+dev.off()
 
 ## prediction interval
 TPSC_stan_pred <- TPSC_stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -198,16 +215,17 @@ p3 <- df1 %>%
   theme_bw() +
   xlab("X") +
   ylab("y") +
-  ggtitle("Likelihood: TPSC student t (modal regression model)",
+  ggtitle("Likelihood: TPSC-Student-t (modal regression model)",
           subtitle = paste0("Coverage Rate:",
-                            round(mean((y < TPSC_df_pred$upper) & 
-                                         (y > TPSC_df_pred$lower)),2),
+                            sprintf("%.2f",round(mean((y < TPSC_df_pred$upper) & 
+                                         (y > TPSC_df_pred$lower)),2)),
                             "||",
-                            "height: ",round(mean(TPSC_df_pred$upper -
-                                                    TPSC_df_pred$lower),2),
+                            "Width: ",
+                            sprintf("%.2f",round(mean(TPSC_df_pred$upper -
+                                                    TPSC_df_pred$lower),2)),
                             "||",
                             "ELPD: ",
-                            round(TPSC_elpd_loo,2)))
+                            sprintf("%.2f",round(TPSC_elpd_loo,2))))
 p3
 
 pall <- grid.arrange(p1,p2,p3,ncol=1)

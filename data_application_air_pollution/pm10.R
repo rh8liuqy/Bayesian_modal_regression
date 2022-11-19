@@ -43,7 +43,7 @@ data_application_NO2 <- function(option){
   else if(option == "TPSC") {
     stan_file <- "../TPSC_t_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
-    title.txt <- "Likelihood: TPSC student t (modal regression model)"
+    title.txt <- "Likelihood: TPSC-Student-t (modal regression model)"
   }
   else if(option == "FG") {
     stan_file <- "../FG_MLR.stan"
@@ -74,6 +74,10 @@ data_application_NO2 <- function(option){
   ## parameter estimation 
   par.est <- stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
   print(par.est)
+  
+  df_post <- stan_fit$draws(variables = c("alpha",paste0("beta[",1:P,"]")), 
+                            format = "df")
+  plot(mcmc_trace(df_post))
   
   ## prediction interval
   stan_pred <- stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -106,23 +110,35 @@ data_application_NO2 <- function(option){
     ylim(-50,300) +
     ggtitle(title.txt,
             subtitle = paste0("Coverage Rate:",
-                              round(mean((y < df_pred$upper) & 
-                                           (y > df_pred$lower)),4),
+                              sprintf("%.2f",
+                                      round(mean((y < df_pred$upper) & 
+                                           (y > df_pred$lower)),2)),
                               "||",
-                              "height: ",round(mean(df_pred$upper -
-                                                      df_pred$lower),4),
+                              "Width: ",sprintf("%.2f",
+                                                round(mean(df_pred$upper -
+                                                      df_pred$lower),2)),
                               "||",
                               "ELPD: ",
-                              round(elpd_loo,4)))
+                              sprintf("%.2f",round(elpd_loo,2))))
   return(return(list(par.est = par.est,
                      elpd_loo = elpd_loo,
                      figure = p1)))
 }
 
+pdf("traceplot_normal.pdf",height = 4,width = 8)
 out1 <- data_application_NO2("normal")
+dev.off()
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
 out2 <- data_application_NO2("ALD")
+dev.off()
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
 out3 <- data_application_NO2("TPSC")
-out4 <- data_application_NO2("FG")
+dev.off()
+#out4 <- data_application_NO2("FG")
+
+out1
+out2
+out3
 
 pall <- grid.arrange(out1$figure,out2$figure,out3$figure,nrow = 3)
 ggsave("pm10.pdf",pall,width = 8,height = 8)
