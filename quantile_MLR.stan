@@ -16,7 +16,7 @@ parameters {
 }
 
 model {
-  sigma ~ inv_gamma(5,5);
+  sigma ~ inv_gamma(1,1);
   target += skew_double_exponential_lpdf(y-alpha-X*beta|0.0,2.0*sigma,p);
 }
 

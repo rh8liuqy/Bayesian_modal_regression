@@ -121,8 +121,8 @@ df_all$likelihood <- factor(df_all$likelihood,levels = c("normal","ALD","TPSC st
 df_all <- df_all %>%
   group_by(likelihood) %>%
     summarise(Mean.Coverage.Rate = paste0(round(mean(Coverage.Rate),4),"(",round(sd(Coverage.Rate)/sqrt(300)*100,2),")"),
-              Mean.Height = paste0(round(mean(height),4),"(",round(sd(height)/sqrt(300)*100,2),")"),
-              Mean.elpd_loo = paste0(round(mean(elpd_loo),4),"(",round(sd(elpd_loo)/sqrt(300)*100,2),")")
+              Mean.Height = paste0(round(mean(height),4),"(",round(sd(height)/sqrt(300),2),")"),
+              Mean.elpd_loo = paste0(round(mean(elpd_loo),4),"(",round(sd(elpd_loo)/sqrt(300),2),")")
     )
 kbl(df_all,
     format = "latex",

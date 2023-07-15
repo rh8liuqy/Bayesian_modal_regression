@@ -118,7 +118,6 @@ p_out <- df_mix %>%
   theme_bw()+
   ylab("density") +
   xlab("Bank deposits ($billions)") +
-  ggtitle("Bank deposits data fitted with the DTP-Student-t") +
   geom_vline(data = df_M,
              aes(xintercept = x,
                  color = `measures of central tendency`,

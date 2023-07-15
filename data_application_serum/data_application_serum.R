@@ -163,8 +163,14 @@ df_est <- df_est[,c(5,6,1,2,3,4)]
 
 library(kableExtra)
 kbl(df_est,
-    digits = 4,
+    digits = 2,
     format = "latex",
+    booktabs = TRUE,
+    caption = "this is caption",
+    label = "this is label") %>%
+  collapse_rows(columns = 1:2, valign = "middle")
+kbl(df_est,
+    digits = 2,
     booktabs = TRUE,
     caption = "this is caption",
     label = "this is label") %>%
