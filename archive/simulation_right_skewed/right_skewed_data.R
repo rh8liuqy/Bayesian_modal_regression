@@ -1,0 +1,331 @@
+rm(list = ls())
+library(cmdstanr)
+library(posterior)
+library(bayesplot)
+library(coda)
+library(MASS)
+library(tidyverse)
+library(lattice)
+library(readxl)
+library(gridExtra)
+library(latex2exp)
+library(parallel)
+library(HDInterval)
+library(mixtools)
+color_scheme_set("brightblue")
+
+set.seed(2)
+## simulate left skewed normal mixture
+N <- 30
+beta0 <- 1
+beta1 <- 1
+
+epsilon <- rmvnormmix(N, 
+                      lambda = c(0.025,0.95,0.025),
+                      mu = c(-25,0,50),
+                      sigma = c(1,1,1))
+X <- runif(N,-1,1)
+X <- as.matrix(X)
+P <- ncol(X)
+y <- beta0 + beta1*X + epsilon
+y <- as.numeric(y)
+
+df1 <- data.frame(y=y,
+                  X=as.numeric(X))
+
+dat <- list(N = N,
+            X = X,
+            P = P,
+            y = y)
+
+## compile stan program for normal
+normal_stan_file <- "../normal_MLR.stan"
+normal_stan_mod <- cmdstan_model(normal_stan_file)
+
+## MCMC normal
+normal_stan_fit <- normal_stan_mod$sample(
+  data = dat,
+  seed = 100,
+  chains = 4,
+  parallel_chains = 4,
+  refresh = 0,
+  iter_warmup = 5000,
+  save_warmup = FALSE,
+  iter_sampling = 10000,
+)
+
+par.est <- normal_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
+## traceplot
+pdf("traceplot_normal.pdf",height = 4,width = 8)
+bayesplot::mcmc_trace(normal_stan_fit$draws(c("alpha",
+                                              paste0("beta[",1:P,"]"))))
+dev.off()
+
+## prediction interval
+normal_stan_pred <- normal_stan_fit$draws(paste0("ystar[",1:N,"]"),
+                                          format = "df")
+normal_point_pred <- apply(normal_stan_pred, 2, median)[1:length(y)]
+normal_hdi_df <- hdi(normal_stan_pred,credMass = 0.9)[,1:length(y)]
+normal_df_pred <- data.frame(pred = normal_point_pred,
+                             lower = normal_hdi_df[1,],
+                             upper = normal_hdi_df[2,])
+
+## model selection
+normal_model_selection <- normal_stan_fit$loo()
+normal_elpd_loo <- normal_model_selection$estimates[1,1]
+
+p1 <- df1 %>%
+  ggplot() +
+  geom_ribbon(data = normal_df_pred, 
+              aes(x = df1$X, ymin = lower, ymax=upper),
+              fill = "grey70") +
+  geom_line(data = normal_df_pred, 
+            aes(x = df1$X, y = pred),
+            color = rgb(0.8,0,0,0.8)) +
+  geom_point(aes(x = X, y = y)) +
+  theme_bw() +
+  xlab("X") +
+  ylab("y") +
+  ggtitle("Likelihood: Normal (mean regression model)",
+          subtitle = paste0("Coverage Rate:",
+                            sprintf("%.2f",round(mean((y < normal_df_pred$upper) & 
+                                         (y > normal_df_pred$lower)),2)),
+                            "||",
+                            "Width: ",
+                            sprintf("%.2f",round(mean(normal_df_pred$upper -
+                                                    normal_df_pred$lower),2)),
+                            "||",
+                            "ELPD: ",
+                            sprintf("%.2f",round(normal_elpd_loo,2))))
+p1
+
+## true error density
+df_error <- data.frame(x = seq(from = -30, to = 60, length.out = 1000))
+true_error_density <- function(x) {
+  p1 <- 0.025*dnorm(x = x, mean = -25, sd = 1)
+  p2 <- 0.95*dnorm(x = x, mean = 0, sd = 1)
+  p3 <- 0.025*dnorm(x = x, mean = 50, sd = 1)
+  output <- p1 + p2 + p3
+  return(output)
+}
+df_error$density <- true_error_density(x = df_error$x)
+df_error$loglik <- "True"
+
+## calculation of residuals
+sigma_summary <- normal_stan_fit$summary("sigma")
+df_normal_residual <- data.frame(x = seq(from = -30, to = 60, length.out = 1000))
+df_normal_residual$density <- dnorm(x = df_normal_residual$x,
+                                    mean = 0,
+                                    sd = sigma_summary$median)
+df_normal_residual$loglik <- "Normal"
+
+df_normal_residual %>%
+  ggplot(aes(x = x, y = density)) +
+  geom_line()
+
+## compile stan program for median regression
+median_stan_file <- "../quantile_MLR.stan"
+median_stan_mod <- cmdstan_model(median_stan_file)
+
+## MCMC median regression
+median_stan_fit <- median_stan_mod$sample(
+  data = dat,
+  seed = 100,
+  chains = 4,
+  parallel_chains = 4,
+  refresh = 0,
+  iter_warmup = 5000,
+  save_warmup = FALSE,
+  iter_sampling = 10000,
+)
+
+par.est <- median_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
+## traceplot
+pdf("traceplot_ALD.pdf",height = 4,width = 8)
+bayesplot::mcmc_trace(median_stan_fit$draws(c("alpha",
+                                              paste0("beta[",1:P,"]"))))
+dev.off()
+
+## prediction interval
+median_stan_pred <- median_stan_fit$draws(paste0("ystar[",1:N,"]"),
+                                          format = "df")
+median_point_pred <- apply(median_stan_pred, 2, median)[1:length(y)]
+median_hdi_df <- hdi(median_stan_pred,credMass = 0.9)[,1:length(y)]
+median_df_pred <- data.frame(pred = median_point_pred,
+                             lower = median_hdi_df[1,],
+                             upper = median_hdi_df[2,])
+
+## model selection
+median_model_selection <- median_stan_fit$loo()
+median_elpd_loo <- median_model_selection$estimates[1,1]
+
+p2 <- df1 %>%
+  ggplot() +
+  geom_ribbon(data = median_df_pred, 
+              aes(x = df1$X, ymin = lower, ymax=upper),
+              fill = "grey70") +
+  geom_line(data = median_df_pred, 
+            aes(x = df1$X, y = pred),
+            color = rgb(0.8,0,0,0.8)) +
+  geom_point(aes(x = X, y = y)) +
+  theme_bw() +
+  xlab("X") +
+  ylab("y") +
+  ggtitle("Likelihood: ALD (median regression model)",
+          subtitle = paste0("Coverage Rate:",
+                            sprintf("%.2f",round(mean((y < median_df_pred$upper) & 
+                                         (y > median_df_pred$lower)),2)),
+                            "||",
+                            "Width: ",
+                            sprintf("%.2f",round(mean(median_df_pred$upper -
+                                                    median_df_pred$lower),2)),
+                            "||",
+                            "ELPD: ",
+                            sprintf("%.2f",round(median_elpd_loo,2))))
+p2
+grid.arrange(p1,p2,nrow=1)
+
+## calculation of residuals
+
+## density function of SkewDoubleExponential distribution
+## https://mc-stan.org/docs/functions-reference/skew-double-exponential-distribution.html
+SkewDoubleExponential <- function(y, mu, sigma, tau) {
+  result <- numeric(length(y))
+  
+  for (i in seq_along(y)) {
+    if (y[i] < mu) {
+      result[i] <- (2 * tau * (1 - tau) / sigma) * exp(-2 / sigma * (1 - tau) * (mu - y[i]))
+    } else {
+      result[i] <- (2 * tau * (1 - tau) / sigma) * exp(-2 / sigma * tau * (y[i] - mu))
+    }
+  }
+  
+  return(result)
+}
+
+sigma_summary <- median_stan_fit$summary("sigma")
+df_ALD_residual <- data.frame(x = seq(from = -30, to = 60, length.out = 1000))
+df_ALD_residual$density <- SkewDoubleExponential(y = df_ALD_residual$x,
+                                                 mu = 0,
+                                                 sigma = sigma_summary$median,
+                                                 tau = 0.5)
+df_ALD_residual$loglik <- "ALD"
+
+df_ALD_residual %>%
+  ggplot(aes(x = x, y = density)) +
+  geom_line()
+
+## compile stan program for TPSC
+TPSC_stan_file <- "../TPSC_t_MLR.stan"
+TPSC_stan_mod <- cmdstan_model(TPSC_stan_file)
+
+## MCMC median regression
+TPSC_stan_fit <- TPSC_stan_mod$sample(
+  data = dat,
+  seed = 100,
+  chains = 4,
+  parallel_chains = 4,
+  refresh = 0,
+  iter_warmup = 5000,
+  save_warmup = FALSE,
+  iter_sampling = 10000,
+)
+
+par.est <- TPSC_stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
+print(par.est)
+
+## traceplot
+pdf("traceplot_TPSC.pdf",height = 4,width = 8)
+bayesplot::mcmc_trace(TPSC_stan_fit$draws(c("alpha",
+                                            paste0("beta[",1:P,"]"))))
+dev.off()
+
+## prediction interval
+TPSC_stan_pred <- TPSC_stan_fit$draws(paste0("ystar[",1:N,"]"),
+                                      format = "df")
+TPSC_point_pred <- apply(TPSC_stan_pred, 2, median)[1:length(y)]
+TPSC_hdi_df <- hdi(TPSC_stan_pred,credMass = 0.9)[,1:length(y)]
+TPSC_df_pred <- data.frame(pred = TPSC_point_pred,
+                           lower = TPSC_hdi_df[1,],
+                           upper = TPSC_hdi_df[2,])
+
+## model selection
+TPSC_model_selection <- TPSC_stan_fit$loo()
+TPSC_elpd_loo <- TPSC_model_selection$estimates[1,1]
+
+p3 <- df1 %>%
+  ggplot() +
+  geom_ribbon(data = TPSC_df_pred, 
+              aes(x = df1$X, ymin = lower, ymax=upper),
+              fill = "grey70") +
+  geom_line(data = TPSC_df_pred, 
+            aes(x = df1$X, y = pred),
+            color = rgb(0.8,0,0,0.8)) +
+  geom_point(aes(x = X, y = y)) +
+  theme_bw() +
+  xlab("X") +
+  ylab("y") +
+  ggtitle("Likelihood: TPSC-Student-t (modal regression model)",
+          subtitle = paste0("Coverage Rate:",
+                            sprintf("%.2f",round(mean((y < TPSC_df_pred$upper) & 
+                                         (y > TPSC_df_pred$lower)),2)),
+                            "||",
+                            "Width: ",
+                            sprintf("%.2f",round(mean(TPSC_df_pred$upper -
+                                                    TPSC_df_pred$lower),2)),
+                            "||",
+                            "ELPD: ",
+                            sprintf("%.2f",round(TPSC_elpd_loo,2))))
+p3
+
+pall <- grid.arrange(p1,p2,p3,ncol=1)
+ggsave("right_skewed_data.pdf", pall, width = 8, height = 8)
+
+## calculation of residuals
+TPSC_student_t <- function(y,w,sigma,delta) {
+  scale_LT <- sigma * sqrt(w/(1-w))
+  scale_RT <- sigma * sqrt((1-w)/w)
+  output <- numeric(length(y))
+  for (i in seq_along(y)) {
+    if (y[i] < 0) {
+      output[i] <- w * 2 / scale_LT * dt(x = y[i]/scale_LT, df = delta)
+    } else {
+      output[i] <- (1 - w) * 2 / scale_RT * dt(x = y[i]/scale_RT, df = delta)
+    }
+  }
+  return(output)
+}
+
+w_summary <- TPSC_stan_fit$summary("w")
+delta_summary <- TPSC_stan_fit$summary("delta")
+sigma_summary <- TPSC_stan_fit$summary("sigma")
+
+df_TPSC_residual <- data.frame(x = seq(from = -30, to = 60, length.out = 1000))
+df_TPSC_residual$density <- TPSC_student_t(y = df_TPSC_residual$x,
+                                           w = w_summary$median,
+                                           sigma = sigma_summary$median,
+                                           delta = delta_summary$median)
+df_TPSC_residual$loglik <- "TPSC-Student-t"
+df_TPSC_residual %>%
+  ggplot(aes(x = x, y = density)) +
+  geom_line()
+
+df_residual_all <- rbind(df_error,
+                         df_normal_residual,
+                         df_ALD_residual,
+                         df_TPSC_residual)
+unique(df_residual_all$loglik)
+df_residual_all$loglik <- factor(df_residual_all$loglik,
+                                 levels = c("True","Normal","ALD","TPSC-Student-t"))
+
+p_residual_all <- df_residual_all %>%
+  mutate(Likelihood = loglik) %>%
+  ggplot(aes(x = x , y = density)) +
+  geom_line(aes(linetype = Likelihood, color = Likelihood)) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+ggsave("right_skewed_residual.pdf", p_residual_all, width = 8, height = 4)

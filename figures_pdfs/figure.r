@@ -12,7 +12,7 @@ dFG <- function(x,w,theta,sigma1,sigma2) {
     return(w*dgumbel(-x,-theta,sigma1)+(1-w)*dgumbel(x,theta,sigma2))
 }
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dFG(xaxis,0.3,0,1,2)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -42,7 +42,7 @@ p1 <- df %>%
                                    TeX("$\\sigma_2 = 3$"),
                                    TeX("$\\sigma_2 = 4$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
@@ -51,7 +51,7 @@ p1
 ggsave("FG1.pdf",p1,height = 2.75,width = 9)
 
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dFG(xaxis,0.5,0,1,1)
 df4 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -80,7 +80,7 @@ p2 <- df %>%
                                    TeX("$w = 0.7$"),
                                    TeX("$w = 0.9$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
@@ -102,18 +102,18 @@ dDTP <- function(x,theta,sigma1,sigma2,delta1,delta2){
   return(p1+p2)
 }
 
-xaxis <- seq(-15,15,length.out = 1000)
-yaxis <- dDTP(xaxis,0,2,1,10,15)
+xaxis <- seq(-10,10,length.out = 1000)
+yaxis <- dDTP(xaxis,0,2,1,10,10)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
                   type = "sigma1 = 2")
 
-yaxis <- dDTP(xaxis,0,3,1,10,15)
+yaxis <- dDTP(xaxis,0,3,1,10,10)
 df2 <- data.frame(y = xaxis,
                   density = yaxis,
                   type = "sigma1 = 3")
 
-yaxis <- dDTP(xaxis,0,4,1,10,15)
+yaxis <- dDTP(xaxis,0,4,1,10,10)
 df3 <- data.frame(y = xaxis,
                   density = yaxis,
                   type = "sigma1 = 4")
@@ -133,11 +133,11 @@ p3 <- df %>%
                                    TeX("$\\sigma_1 = 3$"),
                                    TeX("$\\sigma_1 = 4$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
-  ggtitle(TeX("Density plots of DTP-Student-$t$ given $\\theta = 0, \\sigma_2 = 1, \\delta_1 = 10, \\delta_2 = 15$"))
+  ggtitle(TeX("Density plots of DTP-Student-$t$ given $\\theta = 0, \\sigma_2 = 1, \\delta_1 = 10, \\delta_2 = 10$"))
 p3
 
 ggsave("DTP.pdf",p3,height = 2.75,width = 9)
@@ -150,7 +150,7 @@ dTPSC <- function(x,w,theta,sigma,delta){
   return(p1+p2)
 }
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dTPSC(xaxis,0.3,0,1,1)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -180,7 +180,7 @@ p4 <- df %>%
                                    TeX("$\\sigma = 2$"),
                                    TeX("$\\sigma = 3$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
@@ -189,7 +189,7 @@ p4
 
 ggsave("TPSC1.pdf",p4,height = 2.75,width = 9)
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dTPSC(xaxis,0.7,0,1,1)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -219,7 +219,7 @@ p5 <- df %>%
                                    TeX("$\\delta = 2$"),
                                    TeX("$\\delta = 3$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
@@ -236,7 +236,7 @@ dlogNM <- function(x,w,theta,mu1,nu1,mu2,nu2){
   return(p1+p2)
 }
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dlogNM(xaxis,0.5,0,0,0.5,0,0.5)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -266,7 +266,7 @@ p6 <- df %>%
                                   TeX("$\\mu_2 = 0.5$"),
                                   TeX("$\\mu_2 = 1$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +
@@ -274,7 +274,7 @@ p6 <- df %>%
 p6
 ggsave("logNM1.pdf",p6,height = 2.75,width = 9)
 
-xaxis <- seq(-15,15,length.out = 1000)
+xaxis <- seq(-10,10,length.out = 1000)
 yaxis <- dlogNM(xaxis,0.7,0,0.5,0.3,0,0.5)
 df1 <- data.frame(y = xaxis,
                   density = yaxis,
@@ -304,7 +304,7 @@ p7 <- df %>%
                                   TeX("$\\nu_1 = 0.6$"),
                                   TeX("$\\nu_1 = 0.9$")),
                         values = c(1,2,3)) +
-  scale_x_continuous(breaks = seq(-15,15,5)) +
+  scale_x_continuous(breaks = seq(-10,10,5)) +
   theme_bw() +
   theme(legend.position = "bottom",
         panel.grid = element_blank()) +

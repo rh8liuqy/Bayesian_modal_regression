@@ -80,6 +80,12 @@ stan_fit <- stan_mod$sample(
 par.est <- stan_fit$summary()
 print(par.est)
 
+
+library(kableExtra)
+kbl(par.est, format = "latex", booktabs = TRUE, digits = 2) %>%
+  kable_styling()
+  
+
 ## traceplot
 df_post <- stan_fit$draws(variables = c("theta","sigma1","sigma2",
                                         "delta1","delta2"), 

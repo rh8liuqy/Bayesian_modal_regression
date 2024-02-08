@@ -16,6 +16,7 @@ library(gridExtra)
 library(latex2exp)
 library(parallel)
 library(HDInterval)
+library(kableExtra)
 color_scheme_set("brightblue")
 
 data_application_serum <- function(option) {
@@ -37,32 +38,31 @@ data_application_serum <- function(option) {
   if (option == "normal") {
     stan_file <- "../normal_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
-    title.txt <- "Likelihood: Normal (mean regression model)"
-  }
-  else if(option == "ALD") {
+    title.txt <- "Likelihood: Normal (classic mean regression model)"
+  } else if(option == "ALD") {
     stan_file <- "../quantile_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
     title.txt <- "Likelihood: ALD (median regression model)"
-  }
-  else if(option == "FG") {
+  } else if(option == "FG") {
     stan_file <- "../FG_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
     title.txt <- "Likelihood: FG (modal regression model)"
-  }
-  else if(option == "logNM") {
+  } else if(option == "logNM") {
     stan_file <- "../logNM_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
     title.txt <- "Likelihood: logNM (modal regression model)"
-  }
-  else if(option == "TPSC") {
+  } else if(option == "TPSC") {
     stan_file <- "../TPSC_t_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
     title.txt <- "Likelihood: TPSC student t (modal regression model)"
-  }
-  else if(option == "DTP") {
+  } else if(option == "DTP") {
     stan_file <- "../DTP_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
     title.txt <- "Likelihood: DTP student t (modal regression model)"
+  } else if(option == "SNCP") {
+    stan_file <- "../SN_MLR.stan"
+    stan_mod <- cmdstan_model(stan_file)
+    title.txt <- "Likelihood: SNCP (robust mean regression model)"
   }
   
   ## MCMC
@@ -80,9 +80,47 @@ data_application_serum <- function(option) {
   ## parameter estimation 
   par.est <- stan_fit$summary(c("alpha",paste0("beta[",1:P,"]")))
   print(par.est)
-  df_post <- stan_fit$draws(variables = c("alpha",paste0("beta[",1:P,"]")), 
-                            format = "df")
-  plot(mcmc_trace(df_post))
+  
+  ## traceplots and summary statistics
+  if (option == "normal" | option == "ALD") {
+    df_post <- stan_fit$draws(variables = c("alpha",
+                                            paste0("beta[",1:P,"]"),
+                                            "sigma"), 
+                              format = "df") 
+    posterior_inference <- stan_fit$summary(c("alpha",
+                                              paste0("beta[",1:P,"]"),
+                                              "sigma"))
+  } else if (option == "SN"){
+    df_post <- stan_fit$draws(variables = c("alpha",
+                                            paste0("beta[",1:P,"]"),
+                                            "sigma",
+                                            "gamma1"), 
+                              format = "df")
+    posterior_inference <- stan_fit$summary(c("alpha",
+                                              paste0("beta[",1:P,"]"),
+                                              "sigma",
+                                              "gamma1"))
+  } else if (option == "FG"){
+    df_post <- stan_fit$draws(variables = c("alpha",
+                                            paste0("beta[",1:P,"]"),
+                                            "w",
+                                            "scale1",
+                                            "scale2"), 
+                              format = "df") 
+    posterior_inference <- stan_fit$summary(c("alpha",
+                                              paste0("beta[",1:P,"]"),
+                                              "w",
+                                              "scale1",
+                                              "scale2"))
+  }
+  
+  ## print MCMC trace
+  plot(mcmc_trace(df_post, facet_args = list(ncol = 2)))
+  
+  ## print summary statistics
+  print(posterior_inference %>%
+          kbl(format = "latex", booktabs = TRUE, digits = 2) %>%
+          kable_styling())
   
   ## prediction interval
   stan_pred <- stan_fit$draws(paste0("ystar[",1:N,"]"),
@@ -131,12 +169,9 @@ dev.off()
 pdf("traceplot_ALD.pdf",height = 4,width = 8)
 out2 <- data_application_serum("ALD")
 dev.off()
-pdf("traceplot_TPSC.pdf",height = 4,width = 8)
+pdf("traceplot_FG.pdf",height = 4,width = 8)
 out3 <- data_application_serum("FG")
 dev.off()
-#out4 <- data_application_serum("logNM")
-#out5 <- data_application_serum("TPSC")
-#out6 <- data_application_serum("DTP")
 
 out1
 out2
@@ -152,7 +187,8 @@ df_est <- bind_rows(out1$par.est[c("variable","mean","q5","q95")],
                     out2$par.est[c("variable","mean","q5","q95")],
                     out3$par.est[c("variable","mean","q5","q95")]
                     )
-df_est["Likelihood"] <- rep(c("normal","ALD",
+df_est["Likelihood"] <- rep(c("normal",
+                              "ALD",
                               "FG"),
                             each = 3)
 df_est$elpd_loo <- rep(c(out1$elpd_loo,

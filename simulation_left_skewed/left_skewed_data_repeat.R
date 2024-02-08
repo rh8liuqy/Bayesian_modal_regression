@@ -40,15 +40,16 @@ simu <- function(seed,option) {
     ## compile stan program for normal
     stan_file <- "../normal_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
-  }
-  else if (option == "median") {
+  } else if (option == "median") {
     ## compile stan program for median regression
     stan_file <- "../quantile_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
-  }
-  else if (option == "TPSC") {
+  } else if (option == "TPSC") {
     ## compile stan program for TPSC student t
     stan_file <- "../TPSC_t_MLR.stan"
+    stan_mod <- cmdstan_model(stan_file)
+  } else if (option == "SNCP") {
+    stan_file <- "../SN_MLR.stan"
     stan_mod <- cmdstan_model(stan_file)
   }
   ## MCMC sampling
@@ -82,38 +83,63 @@ simu <- function(seed,option) {
                        elpd_loo = elpd_loo)
   return(df_out)
 }
+
+## the size of simulation
+
+simu_n <- 300
+
 ## normal
-output <- mclapply(1:300,simu,option="normal",mc.cores = 14)
+
+output <- mclapply(1:simu_n,simu,option="normal",mc.cores = 8)
 saveRDS(output,"01_normal_HPD.RDS")
 df_out <- bind_rows(output)
 apply(df_out, 2, mean)
 
 ## ALD
-output <- mclapply(1:300,simu,option="median",mc.cores = 14)
+
+output <- mclapply(1:simu_n,simu,option="median",mc.cores = 8)
 saveRDS(output,"02_quantile_HPD.RDS")
 df_out <- bind_rows(output)
 apply(df_out, 2, mean)
 
 ## TPSC student t
-output <- mclapply(1:300,simu,option="TPSC",mc.cores = 14)
+
+output <- mclapply(1:simu_n,simu,option="TPSC",mc.cores = 8)
 saveRDS(output,"03_TPSC_HPD.RDS")
 df_out <- bind_rows(output)
 apply(df_out, 2, mean)
 
+## SNCP
+
+output <- mclapply(1:simu_n,simu,option="SNCP",mc.cores = 8)
+saveRDS(output,"04_SNCP_HPD.RDS")
+df_out <- bind_rows(output)
+apply(df_out, 2, mean)
+
 ## table creation
+
 output <- readRDS("01_normal_HPD.RDS")
 df_normal <- bind_rows(output)
 output <- readRDS("02_quantile_HPD.RDS")
 df_ALD <- bind_rows(output)
 output <- readRDS("03_TPSC_HPD.RDS")
 df_TPSC <- bind_rows(output)
+output <- readRDS("04_SNCP_HPD.RDS")
+df_SNCP <- bind_rows(output)
 
 df_normal$likelihood <- "normal"
 df_ALD$likelihood <- "ALD"
 df_TPSC$likelihood <- "TPSC student t"
+df_SNCP$likelihood <- "SNCP"
+
 library(kableExtra)
-df_all <- bind_rows(df_normal,df_ALD,df_TPSC)
-df_all$likelihood <- factor(df_all$likelihood,levels = c("normal","ALD","TPSC student t"))
+
+df_all <- bind_rows(df_normal,df_SNCP,df_ALD,df_TPSC)
+df_all$likelihood <- factor(df_all$likelihood,levels = c("normal",
+                                                         "SNCP",
+                                                         "ALD",
+                                                         "TPSC student t")
+                            )
 
 df_all <- df_all %>%
   group_by(likelihood) %>%

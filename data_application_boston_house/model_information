@@ -1,0 +1,19 @@
+[1] "Likelihood: Normal (mean regression model)"
+[1] "Coverage Rate: 0.93"
+[1] "Width: 15.82"
+[1] "ELPD: -1518.66"
+
+[1] "Likelihood: ALD (median regression model)"
+[1] "Coverage Rate: 0.91"
+[1] "Width: 14.55"
+[1] "ELPD: -1444.57"
+
+[1] "Likelihood: SN_CP (mean/robust regression model)"
+[1] "Coverage Rate: 0.91"
+[1] "Width: 14.33"
+[1] "ELPD: -1464.68"
+
+[1] "Likelihood: TPSC-Student-t (modal regression model)"
+[1] "Coverage Rate: 0.89"
+[1] "Width: 13.12"
+[1] "ELPD: -1408.28"

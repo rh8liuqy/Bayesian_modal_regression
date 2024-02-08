@@ -28,7 +28,7 @@ data {
 }
 
 parameters {
-  real<lower=0, upper=1> w1;
+  real<lower=0, upper=1> w;
   real<lower=0> scale1;
   real<lower=0> scale2;
   vector[P] beta;
@@ -38,7 +38,7 @@ parameters {
 model {
   scale1 ~ inv_gamma(1,1);
   scale2 ~ inv_gamma(1,1);
-  target += FG_lpdf(y-alpha-X*beta | w1,
+  target += FG_lpdf(y-alpha-X*beta | w,
   scale1,
   scale2,
   N);
@@ -51,12 +51,12 @@ generated quantities {
   real x1;
   real x2;
   for (i in 1:N) {
-      z = bernoulli_rng(w1);
+      z = bernoulli_rng(w);
       x1 = -gumbel_rng(0,scale1);
       x2 = gumbel_rng(0,scale2);
       ystar[i] = x1*z + x2*(1-z);
       ystar[i] = ystar[i] + alpha + X[i,]*beta;
-      log_lik[i] = FG_lpdf(rep_vector(y[i]-alpha-X[i,]*beta,1) | w1,
+      log_lik[i] = FG_lpdf(rep_vector(y[i]-alpha-X[i,]*beta,1) | w,
       scale1,
       scale2,
       1);
