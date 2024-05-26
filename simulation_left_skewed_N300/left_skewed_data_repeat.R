@@ -11,12 +11,13 @@ library(gridExtra)
 library(latex2exp)
 library(parallel)
 library(HDInterval)
+library(scoringutils)
 color_scheme_set("brightblue")
 
 simu <- function(seed,option) {
   set.seed(seed)
   ## simulate left skewed normal mixture
-  N <- 30
+  N <- 300
   beta0 <- 1
   beta1 <- 1
   
@@ -134,26 +135,54 @@ df_SNCP$likelihood <- "SNCP"
 
 library(kableExtra)
 
-df_all <- bind_rows(df_normal,df_SNCP,df_ALD,df_TPSC)
-df_all$likelihood <- factor(df_all$likelihood,levels = c("normal",
-                                                         "SNCP",
-                                                         "ALD",
-                                                         "TPSC student t")
-                            )
+df_all_N300 <- bind_rows(df_normal,df_SNCP,df_ALD,df_TPSC)
+df_all_N300$likelihood <- factor(df_all_N300$likelihood,levels = c("normal",
+                                                                   "SNCP",
+                                                                   "ALD",
+                                                                   "TPSC student t"))
+df_all_N300$sample_size <- "n = 300"
+
+df_normal_N30 <- readRDS("../simulation_left_skewed_N30/01_normal_HPD.RDS")
+df_SNCP_N30 <- readRDS("../simulation_left_skewed_N30/04_SNCP_HPD.RDS")
+df_ALD_N30 <- readRDS("../simulation_left_skewed_N30/02_quantile_HPD.RDS")
+df_TPSC_N30 <- readRDS("../simulation_left_skewed_N30/03_TPSC_HPD.RDS")
+
+df_normal_N30 <- bind_rows(df_normal_N30)
+df_SNCP_N30 <- bind_rows(df_SNCP_N30)
+df_ALD_N30 <- bind_rows(df_ALD_N30)
+df_TPSC_N30 <- bind_rows(df_TPSC_N30)
+
+df_normal_N30$likelihood <- "normal"
+df_ALD_N30$likelihood <- "ALD"
+df_TPSC_N30$likelihood <- "TPSC student t"
+df_SNCP_N30$likelihood <- "SNCP"
+
+df_all_N30 <- rbind(df_normal_N30,df_SNCP_N30,df_ALD_N30,df_TPSC_N30)
+df_all_N30$likelihood <- factor(df_all_N30$likelihood,levels = c("normal",
+                                                                 "SNCP",
+                                                                 "ALD",
+                                                                 "TPSC student t"))
+df_all_N30$sample_size <- "n = 30"
+
+df_all <- rbind(df_all_N30,df_all_N300)
+df_all$sample_size <- factor(df_all$sample_size, levels = c("n = 30", "n = 300"))
 
 df_all <- df_all %>%
-  group_by(likelihood) %>%
-  summarise(Mean.Coverage.Rate = paste0(round(mean(Coverage.Rate),4),"(",round(sd(Coverage.Rate)/sqrt(300)*100,2),")"),
-            Mean.Height = paste0(round(mean(height),4),"(",round(sd(height)/sqrt(300),2),")"),
-            Mean.elpd_loo = paste0(round(mean(elpd_loo),4),"(",round(sd(elpd_loo)/sqrt(300),2),")")
+  filter(elpd_loo > -2000) %>% ## remove 4 records from SNCP models because of numerical failure
+  group_by(sample_size,likelihood) %>%
+  summarise(Mean.Coverage.Rate = paste0(round(mean(Coverage.Rate)*100,2),"(",round(sd(Coverage.Rate)/sqrt(simu_n)*100,2),")"),
+            Mean.Height = paste0(round(mean(height),4),"(",round(sd(height)/sqrt(simu_n),2),")"),
+            Mean.elpd_loo = paste0(round(mean(elpd_loo),4),"(",round(sd(elpd_loo)/sqrt(simu_n),2),")")
             )
 kbl(df_all,
     format = "latex",
     booktabs = TRUE,
     caption = "this is caption",
-    label = "this is label")
+    label = "this is label") %>%
+  collapse_rows(columns = c(1))
 
 kbl(df_all,
     booktabs = TRUE,
     caption = "this is caption",
-    label = "this is label")
+    label = "this is label") %>%
+  collapse_rows(columns = c(1))

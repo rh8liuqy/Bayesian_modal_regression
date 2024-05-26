@@ -10,6 +10,7 @@ library(coda)
 library(MASS)
 library(tidyverse)
 library(lattice)
+library(latticeExtra)
 library(readxl)
 library(gridExtra)
 library(latex2exp)
@@ -23,8 +24,18 @@ color_scheme_set("brightblue")
 
 df <- read_xlsx("./crime.xlsx")
 
+df$initial <- ""
+df$initial[9] <- "D.C."
+df <- as.data.frame(df)
+
 pdf("scatter_plot_US_crime_DC_include.pdf",width = 7,height = 7)
-splom(df[,c(6,4,9,3)],main = NULL)
+p1 <- splom(~df[c(6,4,9,3)],
+            main = NULL,
+            panel = function(x,y,...) {
+              panel.splom(x,y,...)
+              panel.text(x,y,labels = df$initial,cex = 0.8)
+            })
+p1
 dev.off()
 
 # Follow the suggestion from reviewer 1, remove District of Columbia in plot.
