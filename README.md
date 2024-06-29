@@ -4,7 +4,7 @@
 ## Installation
 
 The `GUD`
-[![](https://cranlogs.r-pkg.org/badges/grand-total/GUD)](https://cran.r-project.org/web/packages/GUD/index.html)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/GUD)](https://CRAN.R-project.org/package=GUD)
 package provides probability density functions and sampling algorithms
 for three key distributions from the General Unimodal Distribution (GUD)
 family: the Flexible Gumbel (FG) distribution, the Double Two-Piece
@@ -106,8 +106,8 @@ TPSC_model <- modal_regression(`murder rate` ~ college + poverty + metropolitan,
 #> 
 #> SAMPLING FOR MODEL 'TPSC' NOW (CHAIN 1).
 #> Chain 1: 
-#> Chain 1: Gradient evaluation took 3.1e-05 seconds
-#> Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.31 seconds.
+#> Chain 1: Gradient evaluation took 3.2e-05 seconds
+#> Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0.32 seconds.
 #> Chain 1: Adjust your expectations accordingly!
 #> Chain 1: 
 #> Chain 1: 
@@ -124,15 +124,15 @@ TPSC_model <- modal_regression(`murder rate` ~ college + poverty + metropolitan,
 #> Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 #> Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
 #> Chain 1: 
-#> Chain 1:  Elapsed Time: 1.128 seconds (Warm-up)
-#> Chain 1:                0.734 seconds (Sampling)
-#> Chain 1:                1.862 seconds (Total)
+#> Chain 1:  Elapsed Time: 1.095 seconds (Warm-up)
+#> Chain 1:                0.674 seconds (Sampling)
+#> Chain 1:                1.769 seconds (Total)
 #> Chain 1: 
 #> 
 #> SAMPLING FOR MODEL 'TPSC' NOW (CHAIN 2).
 #> Chain 2: 
-#> Chain 2: Gradient evaluation took 2.1e-05 seconds
-#> Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.21 seconds.
+#> Chain 2: Gradient evaluation took 1.1e-05 seconds
+#> Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0.11 seconds.
 #> Chain 2: Adjust your expectations accordingly!
 #> Chain 2: 
 #> Chain 2: 
@@ -149,9 +149,9 @@ TPSC_model <- modal_regression(`murder rate` ~ college + poverty + metropolitan,
 #> Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 #> Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
 #> Chain 2: 
-#> Chain 2:  Elapsed Time: 1.054 seconds (Warm-up)
-#> Chain 2:                0.799 seconds (Sampling)
-#> Chain 2:                1.853 seconds (Total)
+#> Chain 2:  Elapsed Time: 1.028 seconds (Warm-up)
+#> Chain 2:                0.591 seconds (Sampling)
+#> Chain 2:                1.619 seconds (Total)
 #> Chain 2:
 ```
 
@@ -162,17 +162,16 @@ One can summarize the Bayesian analysis using the summary function.
 ``` r
 print(summary(TPSC_model), n = 7)
 #> # A tibble: 113 × 10
-#>   variable        mean  median     sd    mad       q5     q95  rhat ess_bulk
-#>   <chr>          <dbl>   <dbl>  <dbl>  <dbl>    <dbl>   <dbl> <dbl>    <dbl>
-#> 1 w             0.270   0.276  0.119  0.134   0.0790   0.466   1.01     347.
-#> 2 delta         1.89    1.80   0.645  0.562   1.08     3.01    1.00    1024.
-#> 3 sigma         1.17    1.16   0.259  0.254   0.769    1.62    1.00     464.
-#> 4 (Intercept)   1.11    1.13   2.65   2.69   -3.53     5.42    1.00     706.
-#> 5 college      -0.199  -0.201  0.0804 0.0824 -0.328   -0.0622  1.00     770.
-#> 6 poverty       0.240   0.248  0.135  0.131   0.00362  0.446   1.01     503.
-#> 7 metropolitan  0.0640  0.0623 0.0158 0.0156  0.0397   0.0916  1.01     489.
+#>   variable    mean  median     sd    mad      q5     q95  rhat ess_bulk ess_tail
+#>   <chr>      <dbl>   <dbl>  <dbl>  <dbl>   <dbl>   <dbl> <dbl>    <dbl>    <dbl>
+#> 1 w         0.276   0.282  0.117  0.126   0.0756  0.464   1.01     368.     235.
+#> 2 delta     1.90    1.78   0.677  0.566   1.09    3.15    1.01     447.     582.
+#> 3 sigma     1.17    1.16   0.265  0.257   0.760   1.62    1.00     540.     343.
+#> 4 (Interc…  1.13    1.31   2.73   2.69   -3.71    5.26    1.00     698.     971.
+#> 5 college  -0.197  -0.201  0.0825 0.0812 -0.325  -0.0554  1.00     648.     995.
+#> 6 poverty   0.244   0.248  0.138  0.147   0.0150  0.462   1.00     568.     784.
+#> 7 metropo…  0.0627  0.0616 0.0143 0.0138  0.0413  0.0889  1.00     521.     640.
 #> # ℹ 106 more rows
-#> # ℹ 1 more variable: ess_tail <dbl>
 ```
 
 One can present the traceplot of the MCMC chain using the
@@ -205,16 +204,16 @@ summary(posterior::subset_draws(TPSC_model, variable = "ystar"))
 #> # A tibble: 51 × 10
 #>    variable   mean median    sd   mad     q5   q95  rhat ess_bulk ess_tail
 #>    <chr>     <dbl>  <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl>
-#>  1 ystar[1]   7.86   6.12 20.0   2.04  3.05  13.8  0.999    1974.    1853.
-#>  2 ystar[2]   2.31   1.28  6.66  2.02 -1.69   8.32 1.00     1860.    1872.
-#>  3 ystar[3]   7.16   6.12 15.5   1.96  3.33  13.9  0.999    1933.    1897.
-#>  4 ystar[4]   6.56   5.61 16.8   2.21  2.27  11.9  1.00     1680.    1791.
-#>  5 ystar[5]   6.87   6.14  6.12  1.94  3.17  13.0  0.999    1969.    1961.
-#>  6 ystar[6]   4.14   2.71 13.8   2.05 -0.411 11.0  1.00     1641.    1829.
-#>  7 ystar[7]   5.21   3.74 16.8   1.95  0.746 11.6  1.00     1981.    2096.
-#>  8 ystar[8]   5.79   4.87 12.0   1.89  2.24  11.8  1.00     1808.    1924.
-#>  9 ystar[9]   7.24   5.21 49.4   2.74  1.56  13.6  1.00     1421.    1758.
-#> 10 ystar[10]  8.15   6.42 38.9   2.00  3.48  13.3  1.00     2092.    1963.
+#>  1 ystar[1]   7.25   6.20 15.3   2.03  3.28  13.4   1.00    1791.    1717.
+#>  2 ystar[2]   2.67   1.35 12.6   2.02 -1.55   9.87  1.00    2016.    1885.
+#>  3 ystar[3]   7.12   6.06  7.78  1.90  3.36  12.7   1.00    1691.    2043.
+#>  4 ystar[4]   6.62   5.54 11.3   2.36  2.24  12.5   1.00    1688.    1793.
+#>  5 ystar[5]   7.37   6.20  8.39  1.96  3.36  13.6   1.00    1811.    1809.
+#>  6 ystar[6]   3.85   2.71  6.18  2.09 -0.315 11.1   1.00    1937.    1937.
+#>  7 ystar[7]   5.22   3.86 14.0   2.04  0.856 12.4   1.00    1475.    1937.
+#>  8 ystar[8]   5.79   4.91  5.04  1.80  2.16  11.7   1.00    1891.    1478.
+#>  9 ystar[9]   6.72   5.28 17.6   2.61  1.18  14.4   1.00    1422.    1693.
+#> 10 ystar[10]  7.75   6.41 10.4   1.94  3.58  14.7   1.00    2065.    1687.
 #> # ℹ 41 more rows
 ```
 

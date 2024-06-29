@@ -1,3 +1,7 @@
+# GUD 1.02
+
+- Fix a invalid URL in README.
+
 # GUD 1.01
 
 - Update a typo in vignettes. Replace "Liu, Q., Huang, X., & Bai, R. (2022)" with "Liu, Q., Huang, X., & Bai, R. (2024)".
