@@ -1,0 +1,11 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Bayesian Modal Regression Based on Mixture Distributions",
+  author   = c(person("Qingyang", "Liu"),
+               person("Xianzheng", "Huang"),
+               person("Ray", "Bai")),
+  journal  = "Computational Statistics and Data Analysis",
+  year     = "2024",
+  pages    = "108012",
+  doi      = "10.1016/j.csda.2024.108012"
+)

@@ -1,0 +1,33 @@
+Package: GUD
+Title: Bayesian Modal Regression Based on the GUD Family
+Version: 1.0.1
+Authors@R: c(
+    person("Qingyang", "Liu", email = "qingyang@email.sc.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3265-6330")),
+    person("Xianzheng", "Huang", email = "huang@stat.sc.edu", role = "aut", comment = c(ORCID = "0000-0001-7077-0869")),
+    person("Ray", "Bai", email = "rbai@mailbox.sc.edu", role = "aut", comment = c(ORCID = "0000-0002-7190-7844")))
+Description: Provides probability density functions and sampling algorithms for three key distributions from the General Unimodal Distribution (GUD) family: the Flexible Gumbel (FG) distribution, the Double Two-Piece (DTP) Student-t distribution, and the Two-Piece Scale (TPSC) Student-t distribution. Additionally, this package includes a function for Bayesian linear modal regression, leveraging these three distributions for model fitting. The details of the Bayesian modal regression model based on the GUD family can be found at Liu, Huang, and Bai (2024) <doi:10.1016/j.csda.2024.108012>.
+URL: https://github.com/rh8liuqy/Bayesian_modal_regression
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Biarch: true
+Depends: R (>= 3.4.0)
+Imports: methods, Rcpp (>= 1.0.12), RcppParallel (>= 5.0.1), rstan (>=
+        2.32.6), rstantools (>= 2.4.0), posterior (>= 1.5.0), Rdpack
+        (>= 2.6)
+LinkingTo: BH (>= 1.66.0), Rcpp (>= 1.0.12), RcppEigen (>= 0.3.3.3.0),
+        RcppParallel (>= 5.0.1), rstan (>= 2.32.6), StanHeaders (>=
+        2.32.0)
+Suggests: MASS, lattice, bayesplot (>= 1.11.1), loo (>= 2.7.0), knitr,
+        rmarkdown
+RdMacros: Rdpack
+SystemRequirements: GNU make
+LazyData: true
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Packaged: 2024-06-29 20:27:25 UTC; kevin_liu
+Author: Qingyang Liu [aut, cre] (<https://orcid.org/0000-0003-3265-6330>),
+  Xianzheng Huang [aut] (<https://orcid.org/0000-0001-7077-0869>),
+  Ray Bai [aut] (<https://orcid.org/0000-0002-7190-7844>)
+Maintainer: Qingyang Liu <qingyang@email.sc.edu>

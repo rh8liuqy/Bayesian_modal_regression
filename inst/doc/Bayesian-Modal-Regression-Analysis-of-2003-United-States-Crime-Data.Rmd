@@ -1,0 +1,92 @@
+---
+title: "Bayesian Modal Regression Analysis of 2003 United States Crime Data"
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bayesian Modal Regression Analysis of 2003 United States Crime Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(GUD)
+```
+
+## Introduction
+
+The general unimodal distribution (GUD) family is essentially a family of two-component mixture distributions. The probability density function (pdf) of a member of GUD family is
+$$
+f\left(y \mid w, \theta, \boldsymbol{\xi}_1, \boldsymbol{\xi}_2\right)=w f_1\left(y \mid \theta, \boldsymbol{\xi}_1\right)+(1-w) f_2\left(y \mid \theta, \boldsymbol{\xi}_2\right),
+$$
+where $w \in [0,1]$ is the weight parameter, $\theta \in (-\infty, +\infty)$ is the mode as a location parameter, $\boldsymbol{\xi}_1$ consists of parameters other than the location parameter in $f_1\left(\cdot \mid \theta, \boldsymbol{\xi}_1\right)$ and $\boldsymbol{\xi}_2$ is defined similarly for $f_2\left(\cdot \mid \theta, \boldsymbol{\xi}_2\right)$. Besides unimodality, all members of the GUD family share three features:
+
+1. The pdfs $f_1\left(\cdot \mid \theta, \boldsymbol{\xi}_1\right)$ and $f_2\left(\cdot \mid \theta, \boldsymbol{\xi}_2\right)$ are unimodal at $\theta$.
+2. The pdfs $f_1\left(\cdot \mid \theta, \boldsymbol{\xi}_1\right)$ and $f_2\left(\cdot \mid \theta, \boldsymbol{\xi}_2\right)$ are left-skewed and right-skewed respectively.
+3. The mixture pdf $f\left(\cdot \mid w, \theta, \boldsymbol{\xi}_1, \boldsymbol{\xi}_2\right)$ in (1) is continuous in its domain.
+
+More details of the GUD family can be found in [Liu, Q., Huang, X., & Bai, R. (2024)](https://arxiv.org/abs/2211.10776).
+
+## Bayesian Modal Regression Analysis of 2003 United States Crime Data
+
+In this section, we demonstrate how to use the `GUD` package to analyze 2003 United States Crime Data as in Section 2 of [Liu, Q., Huang, X., & Bai, R. (2024)](https://arxiv.org/abs/2211.10776).
+
+In "The Art and Science of Learning from Data, 5th edition" by Alan Agresti, Christine A. Franklin, and Bernhard Klingenberg, an interesting example about the 2003 United States crime data is presented to demonstrate the influence of outliers in the classic linear regression model. This example is very compelling and partially motivates the construction of the Bayesian modal regression based on the GUD family. This data contains the murder rate, percentage of college education, poverty percentage, and metropolitan rate for the 50 states in the United States and the District of Columbia (D.C.) from 2003. The murder rate is defined as the annual number of murders per $100{,}000$ people in the population. The poverty percentage is the percentage of residents with income below the poverty level, and the metropolitan rate is defined as the percentage of population living in the metropolitan area. In the exploratory data analysis, we present the conditional scatter plot matrices below.
+
+```{r,fig.width=6,fig.height=6}
+# load data crime from the GUD package
+df1 <- crime
+# the conditional scatter plot matrices of U.S. crime data
+if (require(lattice)) {
+  lattice::splom(~df1[c(6,4,9,3)],
+                 main = NULL,
+                 panel = function(x,y,...) {
+                   panel.splom(x,y,...)
+            })
+}
+```
+
+In the conditional scatter plot matrices, we notice an outlier, Washington, D.C., which stands out and does not follow the common pattern of other states. 
+
+Next, we demonstrate how to fit the Bayesian modal regression model based on the TPSC distribution to the 2003 United States crime data.
+
+```{r}
+TPSC_model <- modal_regression(`murder rate` ~ college + poverty + metropolitan, 
+                               data = df1, 
+                               model = "TPSC",
+                               chains = 2,
+                               iter = 2000)
+```
+
+### Summary of Bayesian Analysis
+
+One can summarize the Bayesian analysis using the summary function.
+
+```{r}
+print(summary(TPSC_model), n = 7)
+```
+
+One can present the traceplot of the MCMC chain using the `bayesplot::mcmc_trace` function.
+
+```{r,fig.width=6, fig.height=4}
+if (require(bayesplot)) {
+  bayesplot::mcmc_trace(TPSC_model, pars = c("(Intercept)",
+                                             "college", 
+                                             "poverty", 
+                                             "metropolitan"))
+}
+```
+
+The summary of posterior predictive distribution can be assessed using the following command. Here `ystar[1]` represents the posterior prediction of the first observation in the dataset, and so on. 
+
+```{r}
+summary(posterior::subset_draws(TPSC_model, variable = "ystar"))
+```
+
+Further comparisons between mean, median, and modal regression can be found in Section 2 of [Liu, Q., Huang, X., & Bai, R. (2024)](https://arxiv.org/abs/2211.10776) and Section 6 of [Liu, Q., Huang, X., & Zhou, H. (2024)](https://www.mdpi.com/2571-905X/7/1/19).
